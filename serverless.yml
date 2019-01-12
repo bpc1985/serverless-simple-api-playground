@@ -1,0 +1,94 @@
+service: sls-api
+
+# setup local dev environment
+custom:
+  dynamodb:
+    start:
+      port: 8000
+      migrate: true #auto delete data, table and create new table again
+      inMemory: true
+      onStart: true
+  serverless-offline: # will set process.env.IS_OFFLINE is true
+    port: 3000
+    # other options ref here: https://www.npmjs.com/package/serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: us-east-1
+  profile: developer #use AWS profile in local to deploy, can be delete it if using default
+  environment:
+    JOBS_TABLE: ${self:service}-${self:opt, self:provider.stage}-jobs #sls-api-dev-jobs
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: arn:aws:dynamodb:*:*:table/${self:provider.environment.JOBS_TABLE}
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb-local
+
+functions:
+  jobs:
+    handler: src/jobs/handler.handler
+  listJobs:
+    handler: src/jobs/list.handler
+    events:
+      - http:
+          method: GET
+          path: /jobs
+  createJob:
+    handler: src/jobs/create.handler
+    events:
+      - http:
+          method: POST
+          path: /jobs
+  getJob:
+    handler: src/jobs/findOne.handler
+    events:
+      - http:
+          method: GET
+          path: /jobs/{id}
+          request:
+            parameters:
+              id: true
+  deleteJob:
+    handler: src/jobs/delete.handler
+    events:
+      - http:
+          method: DELETE
+          path: /jobs/{id}
+          request:
+            parameters:
+              id: true
+  updateJob:
+    handler: src/jobs/update.handler
+    events:
+      - http:
+          method: PUT
+          path: /jobs/{id}
+          request:
+            parameters:
+              id: true
+
+resources:
+  Resources:
+    JobsDynamoDBTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:provider.environment.JOBS_TABLE} #sls-api-dev-jobs
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
