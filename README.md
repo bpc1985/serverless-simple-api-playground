@@ -5,3 +5,5 @@
 - npm run deploy to deploy to AWS
 
 Testing with Chrome extension: POSTMAN or ADVANCED REST CLIENT
+
+Refactoring & Better Code in branch "refactoring-with-better-code"
