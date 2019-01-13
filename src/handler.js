@@ -8,15 +8,15 @@ const schema = Joi.object().keys({
 });
 
 const sendResponse = (statusCode, message, callback) => {
-	const response = {
-		statusCode: statusCode,
-		body: JSON.stringify(message)
-	};
-	callback(null, response);
+  const response = {
+    statusCode: statusCode,
+    body: JSON.stringify(message)
+  };
+  callback(null, response);
 }
 
 const createJob = async (event, callback) => {
-	const dataBody = JSON.parse(event.body);
+  const dataBody = JSON.parse(event.body);
   const timestamp = new Date().getTime();
 
   const {error} = Joi.validate(dataBody, schema);
@@ -70,7 +70,7 @@ const deleteJob = async (event, callback) => {
 }
 
 const updateJob = async (event, callback) => {
-	const id = event.pathParameters.id;
+  const id = event.pathParameters.id;
   const bodyData = JSON.parse(event.body);
   try {
     const response = await databaseManager.updateJob(id, bodyData);
@@ -81,22 +81,22 @@ const updateJob = async (event, callback) => {
 }
 
 module.exports.handler = (event, context, callback) => {
-	switch (event.httpMethod) {
+  switch (event.httpMethod) {
     case 'POST':
-			createJob(event, callback);
-			break;
+      createJob(event, callback);
+      break;
     case 'GET':
       const hasId = event.pathParameters &&  event.pathParameters.id;
       hasId ? getJob(event, callback)
             : getJobs(event, callback);
       break;
     case 'DELETE':
-			deleteJob(event, callback);
-			break;
-		case 'PUT':
+      deleteJob(event, callback);
+      break;
+    case 'PUT':
       updateJob(event, callback);
       break;
-		default:
-			sendResponse(404, `Unsupported method "${event.httpMethod}"`, callback);
-	}
+    default:
+      sendResponse(404, `Unsupported method "${event.httpMethod}"`, callback);
+  }
 };
