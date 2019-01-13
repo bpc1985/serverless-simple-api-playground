@@ -35,41 +35,27 @@ plugins:
   - serverless-dynamodb-local
 
 functions:
-  jobs:
-    handler: src/jobs/handler.handler
-  listJobs:
-    handler: src/jobs/list.handler
+  JOB_CRUD:
+    handler: src/handler.handler
     events:
       - http:
           method: GET
           path: /jobs
-  createJob:
-    handler: src/jobs/create.handler
-    events:
       - http:
           method: POST
           path: /jobs
-  getJob:
-    handler: src/jobs/findOne.handler
-    events:
       - http:
           method: GET
           path: /jobs/{id}
           request:
             parameters:
               id: true
-  deleteJob:
-    handler: src/jobs/delete.handler
-    events:
       - http:
           method: DELETE
           path: /jobs/{id}
           request:
             parameters:
               id: true
-  updateJob:
-    handler: src/jobs/update.handler
-    events:
       - http:
           method: PUT
           path: /jobs/{id}
